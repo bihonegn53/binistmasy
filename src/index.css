@@ -1,0 +1,250 @@
+/* --- Global Reset & Variables --- */
+:root {
+  --primary-bg-dark: #1f2937; /* Dark grayish-blue for hero */
+  --primary-teal: #34d399; /* Greenish-teal */
+  --primary-orange: #fb923c; /* Orange */
+  --text-color-dark: #1f2937;
+  --text-color-light: #f9fafb;
+  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --border-radius: 12px;
+  --font-family: 'Inter', sans-serif; /* A common modern sans-serif font */
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  color: var(--text-color-dark);
+  line-height: 1.5;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* --- Navbar Styles --- */
+.navbar {
+  background-color: white;
+  padding: 15px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-image {
+  height: 40px; /* Adjust based on your logo image */
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.logo-main {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #111827;
+}
+
+.logo-sub {
+  font-weight: 400;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 30px;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #4b5563;
+  font-weight: 500;
+}
+
+.nav-links li.active a {
+  color: var(--primary-teal);
+  position: relative;
+}
+
+.nav-links li.active a::after {
+  content: '';
+  position: absolute;
+  bottom: -22px; /* Pull it down to align with image */
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: var(--primary-teal);
+  border-radius: 3px;
+}
+
+/* --- Hero Section Styles --- */
+.hero-section {
+  /* Replace 'path/to/hero-bg.jpg' with the actual photo from image_8bc694.png */
+  background-image: url('../assets/hero-bg.jpg');
+  background-color: var(--primary-bg-dark);
+  background-size: cover;
+  background-position: center;
+  color: var(--text-color-light);
+  padding: 100px 0;
+}
+
+.hero-text-content {
+  text-align: center;
+}
+
+.hero-title {
+  font-size: 3rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  font-weight: 400;
+  margin-bottom: 40px;
+  color: #d1d5db;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+.btn {
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-weight: 600;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.btn-primary {
+  background-color: var(--primary-teal);
+  color: #111827;
+}
+
+.btn-primary:hover {
+  background-color: #2ab180;
+}
+
+.btn-secondary {
+  background-color: transparent;
+  border-color: var(--text-color-light);
+  color: var(--text-color-light);
+}
+
+.btn-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* --- Curriculum Section Styles --- */
+.curriculum-section {
+  background-color: white;
+  padding: 80px 0;
+}
+
+.section-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 60px;
+  color: #111827;
+  text-transform: uppercase;
+}
+
+.curriculum-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 40px;
+}
+
+/* --- Curriculum Card Styles --- */
+.curriculum-card {
+  background-color: white;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
+  transition: transform 0.2s ease;
+}
+
+.curriculum-card:hover {
+  transform: translateY(-5px);
+}
+
+.card-header {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: white;
+  position: relative;
+}
+
+.card-number {
+  position: absolute;
+  top: 10px;
+  left: 15px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.card-icon {
+  font-size: 4rem; /* Match the large icon look */
+  margin: 30px 0;
+  /* If using real icons, styling would change here */
+}
+
+.card-content {
+  padding: 30px;
+}
+
+.card-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+}
+
+.card-points {
+  list-style: none;
+  font-size: 0.95rem;
+  color: #4b5563;
+}
+
+.card-points li {
+  margin-bottom: 8px;
+}
+
+/* --- Faculty Section Styles --- */
+.faculty-section {
+  padding: 60px 0;
+  border-top: 1px solid #e5e7eb;
+}

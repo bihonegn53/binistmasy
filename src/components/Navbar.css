@@ -1,0 +1,80 @@
+/* --- src/components/Navbar.css --- */
+
+/* Basic Navbar Styling - Adjust based on your visual reference */
+.navbar {
+  background-color: #fff; /* Ensure it matches the white header seen in image_5.png */
+  border-bottom: 1px solid #e5e7eb;
+  padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Logo Styling */
+.logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  gap: 0.5rem;
+}
+
+.logo img {
+  height: 30px;
+}
+
+.logo-text {
+  color: #1f2937;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+/* Navigation Links */
+.nav {
+  list-style: none;
+  display: flex;
+  gap: 1.5rem;
+}
+
+.nav a {
+  text-decoration: none;
+  color: #7a04e1;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.nav a:hover {
+  color: #00D1C1; /* Accent color matching the visual */
+}
+
+/* Call-to-Action Buttons in Navbar (if needed, adjust per reference) */
+.navbar-btns {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  border-radius: 9999px; /* Rounded buttons */
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 0.8rem;
+}
+
+.btn-primary {
+  background-color: #00D1C1; /* Teal accent */
+  color: #fff;
+}
+
+.btn-secondary {
+  border: 2px solid #00D1C1; /* Outline button */
+  color: #00D1C1;
+}
