@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { addProjectLog } from "../utils/logger"; // ✅ logger
-import { 
-  Users, 
-  UserPlus, 
-  Search, 
-  Mail, 
-  Phone, 
-  Trash2, 
-  Edit2, 
-  CheckCircle, 
-  Clock, 
+import {
+  Users,
+  UserPlus,
+  Search,
+  Mail,
+  Phone,
+  Trash2,
+  Edit2,
+  CheckCircle,
+  Clock,
   X,
   Camera,
   Briefcase,
@@ -21,10 +21,8 @@ import {
 } from 'lucide-react';
 
 export default function EmployeePage() {
-  const [employees, setEmployees] = useState(() => {
-    const saved = localStorage.getItem('company_employees');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [employees, setEmployees] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRole, setSelectedRole] = useState('All');
@@ -38,20 +36,35 @@ export default function EmployeePage() {
   const [docModalEmp, setDocModalEmp] = useState(null);
 
   // Form State for Add / Edit Employee (Includes documents array)
-  const [formData, setFormData] = useState({ 
-    name: '', 
-    role: '', 
-    department: 'Engineering', 
-    email: '', 
+  const [formData, setFormData] = useState({
+    name: '',
+    role: '',
+    department: 'Engineering',
+    email: '',
     phone: '',
     status: 'Active',
     avatar: '',
     documents: [] // 👈 ሰነዶች እዚህ ይያዛሉ
   });
 
+  // 🔄 Fetch Employees from Server on Mount
   useEffect(() => {
-    localStorage.setItem('company_employees', JSON.stringify(employees));
-  }, [employees]);
+    fetchEmployees();
+  }, []);
+
+  const fetchEmployees = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/employees');
+      if (!response.ok) throw new Error('Failed to fetch employees');
+      const data = await response.json();
+      setEmployees(data);
+    } catch (error) {
+      console.error('Error fetching employees:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const availableRoles = Array.from(
     new Set(employees.map(emp => emp.role).filter(Boolean))
@@ -105,15 +118,15 @@ export default function EmployeePage() {
   // Open Modal for Add
   const handleOpenAddModal = () => {
     setEditingEmp(null);
-    setFormData({ 
-      name: '', 
-      role: '', 
-      department: 'Engineering', 
-      email: '', 
-      phone: '', 
+    setFormData({
+      name: '',
+      role: '',
+      department: 'Engineering',
+      email: '',
+      phone: '',
       status: 'Active',
       avatar: '',
-      documents: [] 
+      documents: []
     });
     setIsModalOpen(true);
   };
@@ -142,7 +155,7 @@ export default function EmployeePage() {
 
   // Filter Employees
   const filteredEmployees = employees.filter(emp => {
-    const matchesSearch = 
+    const matchesSearch =
       emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       emp.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
       emp.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -152,61 +165,95 @@ export default function EmployeePage() {
     return matchesSearch && matchesRole;
   });
 
-  // Save / Update Employee
-  const handleSubmit = (e) => {
+  // Save / Update Employee via API Server
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name || !formData.role || !formData.email) return;
 
-    if (editingEmp) {
-      // ✏️ UPDATE EMPLOYEE
-      const updatedList = employees.map(emp => 
-        emp.id === editingEmp.id ? { ...emp, ...formData } : emp
-      );
-      setEmployees(updatedList);
-
-      addProjectLog(
-        'Updated Employee',
-        `Updated details and documents for ${formData.name}`,
-        'Bini td',
-        'Admin',
-        'Completed'
-      );
-    } else {
-      // ➕ ADD NEW EMPLOYEE
-      const addedPerson = {
-        id: Date.now(),
+    try {
+      const payload = {
         ...formData,
         avatar: formData.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(formData.name)}`
       };
 
-      setEmployees([addedPerson, ...employees]);
+      if (editingEmp) {
+        // ✏️ UPDATE EMPLOYEE (PUT Request)
+        const response = await fetch(`/api/employees/${editingEmp._id || editingEmp.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
 
-      addProjectLog(
-        'Created New Employee',
-        `Added employee ${formData.name} with ${formData.documents.length} attached documents`,
-        'Bini td',
-        'Admin',
-        'Completed'
-      );
+        if (!response.ok) throw new Error('Failed to update employee');
+        const updatedEmployee = await response.json();
+
+        setEmployees(employees.map(emp =>
+          (emp._id === updatedEmployee._id || emp.id === updatedEmployee.id) ? updatedEmployee : emp
+        ));
+
+        addProjectLog(
+          'Updated Employee',
+          `Updated details and documents for ${formData.name}`,
+          'Bini td',
+          'Admin',
+          'Completed'
+        );
+      } else {
+        // ➕ ADD NEW EMPLOYEE (POST Request)
+        const response = await fetch('/api/employees', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) throw new Error('Failed to create employee');
+        const newEmployee = await response.json();
+
+        setEmployees([newEmployee, ...employees]);
+
+        addProjectLog(
+          'Created New Employee',
+          `Added employee ${formData.name} with ${formData.documents.length} attached documents`,
+          'Bini td',
+          'Admin',
+          'Completed'
+        );
+      }
+
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error('Error saving employee:', error);
+      alert('Error saving employee to server.');
     }
-
-    setIsModalOpen(false);
   };
 
-  // Delete Employee
-  const handleDelete = (id) => {
-    const empToDelete = employees.find(emp => emp.id === id);
+  // Delete Employee via API Server
+  const handleDelete = async (id) => {
+    const empToDelete = employees.find(emp => (emp._id === id || emp.id === id));
     if (!empToDelete) return;
 
     if (window.confirm(`Are you sure you want to delete ${empToDelete.name}?`)) {
-      setEmployees(employees.filter(emp => emp.id !== id));
-      addProjectLog(
-        'Deleted Employee',
-        `Removed employee ${empToDelete.name}`,
-        'Bini td',
-        'Admin',
-        'Completed'
-      );
+      try {
+        const targetId = empToDelete._id || empToDelete.id;
+        const response = await fetch(`/api/employees/${targetId}`, {
+          method: 'DELETE'
+        });
+
+        if (!response.ok) throw new Error('Failed to delete employee');
+
+        setEmployees(employees.filter(emp => (emp._id !== id && emp.id !== id)));
+        
+        addProjectLog(
+          'Deleted Employee',
+          `Removed employee ${empToDelete.name}`,
+          'Bini td',
+          'Admin',
+          'Completed'
+        );
+      } catch (error) {
+        console.error('Error deleting employee:', error);
+        alert('Error deleting employee from server.');
+      }
     }
   };
 
@@ -223,7 +270,7 @@ export default function EmployeePage() {
           <p className="text-slate-400 mt-1">Manage team members, roles, documents, and status.</p>
         </div>
 
-        <button 
+        <button
           onClick={handleOpenAddModal}
           className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-medium px-5 py-2.5 rounded-xl transition shadow-lg shadow-blue-600/20 cursor-pointer"
         >
@@ -311,94 +358,105 @@ export default function EmployeePage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-700/40">
-              {filteredEmployees.map((emp) => {
-                const docCount = emp.documents ? emp.documents.length : 0;
-                
-                return (
-                  <tr key={emp.id} className="hover:bg-slate-800/50 transition-colors">
-                    <td className="py-4 px-6 flex items-center gap-3">
-                      <img 
-                        src={emp.avatar} 
-                        alt={emp.name} 
-                        className="w-10 h-10 rounded-full object-cover border border-slate-600 bg-slate-700"
-                      />
-                      <div>
-                        <p className="font-semibold text-slate-100">{emp.name}</p>
-                        <p className="text-xs text-slate-400">{emp.email}</p>
-                      </div>
-                    </td>
+              {loading ? (
+                <tr>
+                  <td colSpan="5" className="py-8 text-center text-slate-400">Loading employees from server...</td>
+                </tr>
+              ) : filteredEmployees.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="py-8 text-center text-slate-400">No employees found.</td>
+                </tr>
+              ) : (
+                filteredEmployees.map((emp) => {
+                  const docCount = emp.documents ? emp.documents.length : 0;
+                  const empKey = emp._id || emp.id;
+                  
+                  return (
+                    <tr key={empKey} className="hover:bg-slate-800/50 transition-colors">
+                      <td className="py-4 px-6 flex items-center gap-3">
+                        <img
+                          src={emp.avatar}
+                          alt={emp.name}
+                          className="w-10 h-10 rounded-full object-cover border border-slate-600 bg-slate-700"
+                        />
+                        <div>
+                          <p className="font-semibold text-slate-100">{emp.name}</p>
+                          <p className="text-xs text-slate-400">{emp.email}</p>
+                        </div>
+                      </td>
 
-                    <td className="py-4 px-6 font-medium text-slate-200">
-                      <div className="flex items-center gap-1.5">
-                        <Briefcase className="h-4 w-4 text-blue-400" />
-                        {emp.role}
-                      </div>
-                    </td>
+                      <td className="py-4 px-6 font-medium text-slate-200">
+                        <div className="flex items-center gap-1.5">
+                          <Briefcase className="h-4 w-4 text-blue-400" />
+                          {emp.role}
+                        </div>
+                      </td>
 
-                    <td className="py-4 px-6">
-                      <span className="bg-slate-800 text-slate-300 px-3 py-1 rounded-full text-xs border border-slate-700">
-                        {emp.department}
-                      </span>
-                    </td>
+                      <td className="py-4 px-6">
+                        <span className="bg-slate-800 text-slate-300 px-3 py-1 rounded-full text-xs border border-slate-700">
+                          {emp.department}
+                        </span>
+                      </td>
 
-                    <td className="py-4 px-6">
-                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
-                        emp.status === 'Active' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'
-                      }`}>
-                        {emp.status}
-                      </span>
-                    </td>
+                      <td className="py-4 px-6">
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
+                          emp.status === 'Active' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'
+                        }`}>
+                          {emp.status}
+                        </span>
+                      </td>
 
-                    {/* Actions */}
-                    <td className="py-4 px-6 text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        
-                        {/* 📎 View Uploaded Documents Icon */}
-                        <button 
-                          onClick={() => handleOpenDocModal(emp)}
-                          className="p-2 text-slate-400 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition relative"
-                          title="View / Download Documents"
-                        >
-                          <Paperclip className="h-4 w-4" />
-                          {docCount > 0 && (
-                            <span className="absolute -top-1 -right-1 bg-amber-500 text-slate-950 font-bold text-[10px] w-4 h-4 rounded-full flex items-center justify-center">
-                              {docCount}
-                            </span>
-                          )}
-                        </button>
+                      {/* Actions */}
+                      <td className="py-4 px-6 text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          
+                          {/* 📎 View Uploaded Documents Icon */}
+                          <button
+                            onClick={() => handleOpenDocModal(emp)}
+                            className="p-2 text-slate-400 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition relative cursor-pointer"
+                            title="View / Download Documents"
+                          >
+                            <Paperclip className="h-4 w-4" />
+                            {docCount > 0 && (
+                              <span className="absolute -top-1 -right-1 bg-amber-500 text-slate-950 font-bold text-[10px] w-4 h-4 rounded-full flex items-center justify-center">
+                                {docCount}
+                              </span>
+                            )}
+                          </button>
 
-                        <button 
-                          onClick={() => handleOpenEditModal(emp)}
-                          className="p-2 text-slate-400 hover:text-blue-400 hover:bg-slate-800 rounded-lg transition"
-                          title="Edit Employee"
-                        >
-                          <Edit2 className="h-4 w-4" />
-                        </button>
+                          <button
+                            onClick={() => handleOpenEditModal(emp)}
+                            className="p-2 text-slate-400 hover:text-blue-400 hover:bg-slate-800 rounded-lg transition cursor-pointer"
+                            title="Edit Employee"
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </button>
 
-                        <button 
-                          onClick={() => handleDelete(emp.id)}
-                          className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg transition"
-                          title="Delete Employee"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
+                          <button
+                            onClick={() => handleDelete(empKey)}
+                            className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg transition cursor-pointer"
+                            title="Delete Employee"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* ➕ ADD / EDIT EMPLOYEE MODAL ( includes Document Upload Icon ) */}
+      {/* ➕ ADD / EDIT EMPLOYEE MODAL */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-[#1e293b] border border-slate-700 rounded-2xl w-full max-w-md p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            <button 
+            <button
               onClick={() => setIsModalOpen(false)}
-              className="absolute right-4 top-4 text-slate-400 hover:text-white"
+              className="absolute right-4 top-4 text-slate-400 hover:text-white cursor-pointer"
             >
               <X className="h-5 w-5" />
             </button>
@@ -408,11 +466,11 @@ export default function EmployeePage() {
             </h2>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              
+             
               {/* Photo Upload */}
-              <div className="flex flex-col items-center justify-center border-2 border-dashed border-slate-700 rounded-xl p-3 bg-[#0f172a]/50 relative">
-                <input 
-                  type="file" 
+              <div className="flex flex-col items-center justify-center border-2 border-dashed border-slate-700 rounded-xl p-3 bg-[#0f172a]/50 relative cursor-pointer">
+                <input
+                  type="file"
                   accept="image/*"
                   onChange={handleImageChange}
                   className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
@@ -429,8 +487,8 @@ export default function EmployeePage() {
 
               <div>
                 <label className="block text-xs text-slate-400 mb-1">Full Name</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   required
                   value={formData.name}
                   onChange={e => setFormData({...formData, name: e.target.value})}
@@ -440,8 +498,8 @@ export default function EmployeePage() {
 
               <div>
                 <label className="block text-xs text-slate-400 mb-1">Job Position / Role</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   required
                   value={formData.role}
                   onChange={e => setFormData({...formData, role: e.target.value})}
@@ -451,7 +509,7 @@ export default function EmployeePage() {
 
               <div>
                 <label className="block text-xs text-slate-400 mb-1">Department</label>
-                <select 
+                <select
                   value={formData.department}
                   onChange={e => setFormData({...formData, department: e.target.value})}
                   className="w-full bg-[#0f172a] border border-slate-700 rounded-lg px-3 py-2 text-sm text-white"
@@ -465,8 +523,8 @@ export default function EmployeePage() {
 
               <div>
                 <label className="block text-xs text-slate-400 mb-1">Email Address</label>
-                <input 
-                  type="email" 
+                <input
+                  type="email"
                   required
                   value={formData.email}
                   onChange={e => setFormData({...formData, email: e.target.value})}
@@ -482,8 +540,8 @@ export default function EmployeePage() {
                 </label>
 
                 <div className="border border-dashed border-slate-700 hover:border-amber-500/60 rounded-xl p-3 bg-[#0f172a]/40 text-center cursor-pointer relative mb-2">
-                  <input 
-                    type="file" 
+                  <input
+                    type="file"
                     onChange={handleFormFileUpload}
                     className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                   />
@@ -502,10 +560,10 @@ export default function EmployeePage() {
                           <FileText className="h-3.5 w-3.5 text-amber-400 shrink-0" />
                           <span className="truncate text-slate-300">{doc.name}</span>
                         </div>
-                        <button 
+                        <button
                           type="button"
                           onClick={() => handleRemoveFormDoc(doc.id)}
-                          className="text-slate-500 hover:text-red-400 p-0.5"
+                          className="text-slate-500 hover:text-red-400 p-0.5 cursor-pointer"
                         >
                           <X className="h-3.5 w-3.5" />
                         </button>
@@ -516,16 +574,16 @@ export default function EmployeePage() {
               </div>
 
               <div className="flex gap-3 pt-3">
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 py-2 rounded-lg text-sm"
+                  className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 py-2 rounded-lg text-sm cursor-pointer"
                 >
                   Cancel
                 </button>
-                <button 
-                  type="submit" 
-                  className="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-2 rounded-lg text-sm font-medium"
+                <button
+                  type="submit"
+                  className="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-2 rounded-lg text-sm font-medium cursor-pointer"
                 >
                   {editingEmp ? 'Update Employee' : 'Save Employee'}
                 </button>
@@ -539,9 +597,9 @@ export default function EmployeePage() {
       {isDocModalOpen && docModalEmp && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-[#1e293b] border border-slate-700 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative">
-            <button 
+            <button
               onClick={() => setIsDocModalOpen(false)}
-              className="absolute right-4 top-4 text-slate-400 hover:text-white"
+              className="absolute right-4 top-4 text-slate-400 hover:text-white cursor-pointer"
             >
               <X className="h-5 w-5" />
             </button>
@@ -560,8 +618,8 @@ export default function EmployeePage() {
             <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
               {docModalEmp.documents && docModalEmp.documents.length > 0 ? (
                 docModalEmp.documents.map((doc) => (
-                  <div 
-                    key={doc.id} 
+                  <div
+                    key={doc.id}
                     className="flex items-center justify-between p-3 bg-[#0f172a] border border-slate-700/60 rounded-xl"
                   >
                     <div className="flex items-center gap-3 min-w-0">
@@ -572,8 +630,8 @@ export default function EmployeePage() {
                       </div>
                     </div>
 
-                    <a 
-                      href={doc.data} 
+                    <a
+                      href={doc.data}
                       download={doc.name}
                       className="p-1.5 text-slate-400 hover:text-blue-400 hover:bg-slate-800 rounded-lg transition"
                       title="Download Document"
@@ -590,9 +648,9 @@ export default function EmployeePage() {
             </div>
 
             <div className="mt-6 pt-4 border-t border-slate-700/60 flex justify-end">
-              <button 
+              <button
                 onClick={() => setIsDocModalOpen(false)}
-                className="bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-lg text-sm"
+                className="bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-lg text-sm cursor-pointer"
               >
                 Close
               </button>

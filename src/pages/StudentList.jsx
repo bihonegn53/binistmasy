@@ -236,27 +236,8 @@ export default function StudentListPage() {
   return (
     <div style={{ maxWidth: '1150px', margin: '2rem auto', padding: '1.5rem', fontFamily: "'Inter', sans-serif" }}>
       
-      {/* CSS for hiding elements during print */}
-      <style>{`
-        @media print {
-          /* Hide search, filters, buttons, and action columns */
-          .no-print {
-            display: none !important;
-          }
-          /* Ensure table fits and looks clean on paper */
-          table {
-            width: 100% !important;
-            border-collapse: collapse !important;
-          }
-          th, td {
-            border: 1px solid #cbd5e1 !important;
-            padding: 0.5rem !important;
-          }
-        }
-      `}</style>
-
       {/* HEADER SECTION */}
-      <div className="no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h2 style={{ margin: 0, color: '#0f172a', fontSize: '1.75rem', fontWeight: '700' }}>Academy Student Management</h2>
           <p style={{ margin: '0.25rem 0 0 0', color: '#64748b', fontSize: '0.95rem' }}>Manage and register academy students efficiently</p>
@@ -287,13 +268,13 @@ export default function StudentListPage() {
       </div>
 
       {error && (
-        <div className="no-print" style={{ padding: '1rem', marginBottom: '1.5rem', borderRadius: '8px', backgroundColor: '#fee2e2', color: '#991b1b', border: '1px solid #fca5a5' }}>
+        <div style={{ padding: '1rem', marginBottom: '1.5rem', borderRadius: '8px', backgroundColor: '#fee2e2', color: '#991b1b', border: '1px solid #fca5a5' }}>
           {error}
         </div>
       )}
 
       {/* SEARCH AND FILTERS */}
-      <div className="no-print" style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
         <div style={{ flex: 2, minWidth: '220px' }}>
           <input
             type="text"
@@ -339,7 +320,7 @@ export default function StudentListPage() {
                 <th style={{ padding: '0.85rem 1rem' }}>Department</th>
                 <th style={{ padding: '0.85rem 1rem' }}>Program</th>
                 <th style={{ padding: '0.85rem 1rem' }}>Start Date (E.C.)</th>
-                <th className="no-print" style={{ padding: '0.85rem 1rem', textAlign: 'center' }}>Actions</th>
+                <th style={{ padding: '0.85rem 1rem', textAlign: 'center' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -364,7 +345,7 @@ export default function StudentListPage() {
                     <span style={{ ...badgeStyle, backgroundColor: '#f1f5f9', color: '#334155' }}>{student.program}</span>
                   </td>
                   <td style={{ padding: '0.85rem 1rem', color: '#475569', fontWeight: '500' }}>{toEthiopianDate(student.startDate)}</td>
-                  <td className="no-print" style={{ padding: '0.85rem 1rem', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                  <td style={{ padding: '0.85rem 1rem', textAlign: 'center', whiteSpace: 'nowrap' }}>
                     <button
                       onClick={() => handleEditOpen(student)}
                       style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', fontWeight: '600', borderRadius: '6px', border: 'none', backgroundColor: '#2563eb', color: '#fff', cursor: 'pointer', marginRight: '0.4rem' }}
@@ -388,7 +369,6 @@ export default function StudentListPage() {
       {/* --- ATTRACTIVE ADD STUDENT MODAL --- */}
       {isAddOpen && (
         <div
-          className="no-print"
           style={{
             position: 'fixed',
             top: 0,
@@ -569,7 +549,7 @@ export default function StudentListPage() {
 
       {/* --- EDIT MODAL --- */}
       {editingStudent && (
-        <div className="no-print" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}>
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}>
           <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', width: '100%', maxWidth: '560px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)', maxHeight: '90vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
             <div style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', padding: '1.25rem 1.75rem', color: '#ffffff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '600' }}>✏️ Edit Student Details</h3>
@@ -639,16 +619,14 @@ export default function StudentListPage() {
           </div>
         </div>
       )}
-
-      {/* Print Button */}
       <button
-        onClick={() => window.print()}
-        className="no-print px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold flex items-center gap-2 transition-all shadow-sm cursor-pointer mt-4"
-      >
-        <Printer className="w-5 h-5" />
-        <span>Print Page</span>
-      </button>
-
+  onClick={() => window.print()}
+  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold flex items-center gap-2 transition-all shadow-sm cursor-print"
+>
+  <Printer className="w-5 h-5" />
+  <span>Print Page</span>
+</button>
     </div>
+    
   );
 }

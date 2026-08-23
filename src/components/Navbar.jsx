@@ -1,29 +1,29 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import logo from '../assets/logo.png';
 
 function Navbar() {
   const location = useLocation();
   const [hoveredIndex, setHoveredIndex] = useState(null);
 
   const navItems = [
-    { label: 'Home', path: '/' },
-    { label: 'Courses', path: '/courses' },
+    { label: 'Homepage', path: '/home' }, // <--- የቤት ገጹ አድራሻ በትክክል /home ተደርጎ ተስተካክሏል
+    { label: 'Department', path: '/department' },
     { label: 'About', path: '/about' },
-    { label: 'studentdata', path: '/ContinuousAssessmentPage' },
-    { label: 'Student List', path: '/studentlist' },
-     { label: 'AssessmentTable', path: '/AssessmentTable' },
+    { label: 'Student Data', path: '/continuous-assessment' },
+    { label: 'Student List', path: '/student-list' },
+    { label: 'Assessment Table', path: '/assessment-table' },
   ];
+
   return (
     <nav style={styles.navbar}>
       <div style={styles.container}>
         {/* Logo Section */}
-        <Link to="/" style={styles.logoLink}>
+        <Link to="/home" style={styles.logoLink}>
           <div style={styles.logoImageWrapper}>
-          <img 
+            <img 
               src="/congra.jpg" 
               alt="logo" 
-              style={styles.heroImg} 
+              style={styles.logoImg} 
             />
           </div>
           <div style={styles.logoTextGroup}>
@@ -58,7 +58,6 @@ function Navbar() {
                   }}
                 >
                   {item.label}
-                  {/* Subtle active indicator dot */}
                   {isActive && <span style={styles.activeDot} />}
                 </Link>
               </li>
@@ -98,33 +97,34 @@ const styles = {
   logoImageWrapper: {
     width: '42px',
     height: '42px',
-    borderRadius: '2px',
+    borderRadius: '8px',
     background: 'linear-gradient(135deg, #a855f7, #6366f1)',
     padding: '2px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     boxShadow: '0 0 15px rgba(168, 85, 247, 0.4)',
+    overflow: 'hidden',
   },
   logoImg: {
-    width: '10%',
-    height: '10%',
-    objectFit: 'contain',
-    borderRadius: '8px',
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+    borderRadius: '6px',
   },
   logoTextGroup: {
     display: 'flex',
     flexDirection: 'column',
   },
   logoTitle: {
-    fontSize: '18',
+    fontSize: '18px',
     fontWeight: '800',
     letterSpacing: '0.8px',
     color: '#f70e0e',
     lineHeight: '1.1',
   },
   logoSubtitle: {
-    fontSize: '15',
+    fontSize: '15px',
     fontWeight: '700',
     letterSpacing: '2px',
     color: '#09040f',

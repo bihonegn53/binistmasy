@@ -1,48 +1,31 @@
 import React, { useState } from 'react';
 import './HomePage.css'; 
 
-// Local asset imports
-import biniadaImg from '../assets/biniada.jpg';
-import biniImg from '../assets/bini.jpg';
-import yalfImg from '../assets/yalf.jpg';
-
-// Data: Core Curriculum
+// Data: Core Curriculum (ምስሎቹ ከኦንላይን እንዲመጡ ተደርጓል)
 const curriculumData = [
   {
     id: 'foundations',
     cardNumber: 'CARD 1',
     title: 'FOUNDATIONS',
-    image: biniadaImg,
+    image: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=400&q=80',
     color: '#34d399',
-    points: [
-      'UX Research',
-      'Information Architecture',
-      'User Journeys',
-    ],
+    points: ['UX Research', 'Information Architecture', 'User Journeys'],
   },
   {
     id: 'interface-design',
     cardNumber: 'CARD 2',
     title: 'INTERFACE DESIGN',
-    image: biniImg,
+    image: 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=400&q=80',
     color: '#60a5fa',
-    points: [
-      'Wireframing & Prototyping',
-      'Visual Hierarchy',
-      'Design Systems',
-    ],
+    points: ['Wireframing & Prototyping', 'Visual Hierarchy', 'Design Systems'],
   },
   {
     id: 'advanced-practice',
     cardNumber: 'CARD 3',
     title: 'ADVANCED PRACTICE',
-    image: yalfImg,
+    image: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=400&q=80',
     color: '#a78bfa',
-    points: [
-      'Usability Testing',
-      'Interactive Micro-animations',
-      'Design Hand-off',
-    ],
+    points: ['Usability Testing', 'Interactive Micro-animations', 'Design Hand-off'],
   },
 ];
 
@@ -88,14 +71,7 @@ const CurriculumCard = ({ cardNumber, title, image, color, points, onApply }) =>
         <img 
           src={image} 
           alt={title} 
-          style={{ 
-            width: '60px', 
-            height: '60px', 
-            borderRadius: '50%', 
-            objectFit: 'cover',
-            display: 'block',
-            margin: '10px auto 0'
-          }} 
+          style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', display: 'block', margin: '10px auto 0' }} 
         />
       </div>
     </div>
@@ -146,7 +122,6 @@ const EnrollmentModal = ({ isOpen, onClose, selectedTrack }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  // Sync selected track if changed from parent button click
   React.useEffect(() => {
     if (selectedTrack) {
       setFormData((prev) => ({ ...prev, track: selectedTrack }));
@@ -163,8 +138,6 @@ const EnrollmentModal = ({ isOpen, onClose, selectedTrack }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-
-    // Simulate API request delay
     setTimeout(() => {
       setIsSubmitting(false);
       setIsSuccess(true);
@@ -192,9 +165,7 @@ const EnrollmentModal = ({ isOpen, onClose, selectedTrack }) => {
               Thank you, <strong>{formData.fullName}</strong>. Our admissions team will contact you at{' '}
               <strong>{formData.email}</strong> within 24 hours.
             </p>
-            <button className="btn-primary" onClick={handleResetAndClose}>
-              Done
-            </button>
+            <button className="btn-primary" onClick={handleResetAndClose}>Done</button>
           </div>
         ) : (
           <>
@@ -256,12 +227,7 @@ const EnrollmentModal = ({ isOpen, onClose, selectedTrack }) => {
 
                 <div className="form-group">
                   <label htmlFor="experienceLevel">Design Experience</label>
-                  <select
-                    id="experienceLevel"
-                    name="experienceLevel"
-                    value={formData.experienceLevel}
-                    onChange={handleChange}
-                  >
+                  <select id="experienceLevel" name="experienceLevel" value={formData.experienceLevel} onChange={handleChange}>
                     <option value="Beginner">Complete Beginner</option>
                     <option value="Intermediate">Self-Taught / Basic Knowledge</option>
                     <option value="Advanced">Professional / Switching Careers</option>
@@ -307,45 +273,27 @@ const HomePage = () => {
 
   return (
     <div className="homepage">
-      {/* Modal Render */}
       <EnrollmentModal isOpen={isModalOpen} onClose={handleCloseModal} selectedTrack={selectedTrack} />
 
       {/* 1. Hero Section */}
       <header className="hero-section" style={{ backgroundColor: '#7422c5', padding: '70px 20px' }}>
-        <div 
-          className="container hero-container" 
-          style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '3rem', 
-            maxWidth: '1200px', 
-            margin: '0 auto' 
-          }}
-        >
-          {/* New Attractive & Large School Image */}
+        <div className="container hero-container" style={{ display: 'flex', alignItems: 'center', gap: '3rem', maxWidth: '1200px', margin: '0 auto' }}>
           <div className="hero-image-container" style={{ flex: '1.2' }}>
             <img 
               src="https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1200&q=80" 
               alt="ASE&BINI School Campus" 
-              style={{ 
-                width: '100%', 
-                height: '380px', 
-                objectFit: 'cover',
-                borderRadius: '18px', 
-                display: 'block',
-                boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.15)'
-              }} 
+              style={{ width: '100%', height: '380px', objectFit: 'cover', borderRadius: '18px', display: 'block', boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)' }} 
             />
           </div>
 
           <div className="hero-text-content" style={{ flex: '1', color: '#ffffff' }}>
             <h1 className="hero-title" style={{ marginTop: '10px', fontSize: '2.5rem', lineHeight: '1.2' }}>
-              WELCOME TO ASE&BINI SCHOOL ACADEMY<br />
+              WELCOME TO ASE&BINI SCHOOL ACADEMY
             </h1>
             <p className="hero-subtitle" style={{ fontSize: '1.1rem', margin: '20px 0 30px', opacity: 0.9 }}>
               Master the skills that shape the digital future. Join our immersive, project-based curriculum led by industry practitioners.
             </p>
-            <button className="btn-hero-cta" onClick={() => handleOpenModal()}>
+            <button className="btn-hero-cta" onClick={() => handleOpenModal()} style={{ background: '#fff', color: '#7422c5', padding: '12px 28px', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>
               Apply Now
             </button>
           </div>
@@ -357,7 +305,7 @@ const HomePage = () => {
         <div className="container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div className="about-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem', alignItems: 'center' }}>
             <div className="about-text">
-              <h2 className="section-title" style={{ textAlign: 'left' }}>About ASE&BINI School</h2>
+              <h2 className="section-title" style={{ textAlign: 'left', color: '#1f2937', fontSize: '2rem', marginBottom: '20px' }}>About ASE&BINI School</h2>
               <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: '#4b5563' }}>
                 At <strong>ASE&BINI UI Designer Academy</strong>, we bridge the gap between creative curiosity and industry readiness. Founded by passionate product designers, our mission is to empower the next generation of visual thinkers, UX researchers, and interface specialists.
               </p>
@@ -374,7 +322,6 @@ const HomePage = () => {
             </div>
           </div>
 
-          {/* School Stats Bar */}
           <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem', marginTop: '50px', textAlign: 'center' }}>
             {schoolStats.map((stat, idx) => (
               <div key={idx} className="stat-card" style={{ padding: '20px', background: '#ffffff', borderRadius: '10px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
@@ -389,8 +336,8 @@ const HomePage = () => {
       {/* 3. Core Curriculum Section */}
       <section className="curriculum-section" style={{ padding: '60px 20px' }}>
         <div className="container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <h2 className="section-title">Core Learning Tracks</h2>
-          <div className="curriculum-grid">
+          <h2 className="section-title" style={{ textAlign: 'center', fontSize: '2rem', marginBottom: '40px', color: '#1f2937' }}>Core Learning Tracks</h2>
+          <div className="curriculum-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
             {curriculumData.map((card, index) => (
               <CurriculumCard key={index} {...card} onApply={handleOpenModal} />
             ))}
@@ -401,11 +348,11 @@ const HomePage = () => {
       {/* 4. Featured Student Projects Section */}
       <section className="projects-section" style={{ padding: '60px 20px', backgroundColor: '#f3f4f6' }}>
         <div className="container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <h2 className="section-title">Student Portfolio Projects</h2>
+          <h2 className="section-title" style={{ textAlign: 'center', fontSize: '2rem', color: '#1f2937' }}>Student Portfolio Projects</h2>
           <p className="section-subtitle" style={{ textAlign: 'center', color: '#6b7280', marginBottom: '40px' }}>
             Explore actual work built by our students during their design studio modules.
           </p>
-          <div className="projects-grid">
+          <div className="projects-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
             {featuredProjects.map((project, idx) => (
               <ProjectCard key={idx} {...project} />
             ))}
@@ -415,17 +362,17 @@ const HomePage = () => {
 
       {/* 5. Contact & CTA Section */}
       <section className="contact-section container" style={{ padding: '60px 20px', textAlign: 'center', maxWidth: '800px', margin: '0 auto' }}>
-        <h2 className="section-title">Get In Touch</h2>
-        <p style={{ fontSize: '1.1rem', color: '#4b5563', marginBottom: '20px' }}>
+        <h2 className="section-title" style={{ fontSize: '2rem', marginBottom: '15px', color: '#1f2937' }}>Get In Touch</h2>
+        <p style={{ fontSize: '1.1rem', color: '#4b5563', marginBottom: '30px' }}>
           Interested in enrolling or hiring our top UI design graduates? Reach out to us today.
         </p>
-        <div className="contact-details" style={{ background: '#7422c5', color: '#fff', padding: '30px', borderRadius: '12px' }}>
-          <p style={{ margin: '8px 0', fontSize: '1.1rem' }}><strong>Phone:</strong> 0953595426</p>
-          <p style={{ margin: '8px 0', fontSize: '1.1rem' }}><strong>Email:</strong> admissions@asebini-uidesign.edu</p>
-          <p style={{ margin: '8px 0', fontSize: '1.1rem' }}><strong>Location:</strong> Addis Ababa, Ethiopia</p>
+        <div className="contact-details" style={{ background: '#7422c5', color: '#fff', padding: '40px', borderRadius: '16px', boxShadow: '0 10px 30px rgba(116, 34, 197, 0.2)' }}>
+          <p style={{ margin: '10px 0', fontSize: '1.1rem' }}><strong>Phone:</strong> 0953595426</p>
+          <p style={{ margin: '10px 0', fontSize: '1.1rem' }}><strong>Email:</strong> admissions@asebini-uidesign.edu</p>
+          <p style={{ margin: '10px 0', fontSize: '1.1rem' }}><strong>Location:</strong> Addis Ababa, Ethiopia</p>
           <button 
             className="btn-primary" 
-            style={{ marginTop: '20px', backgroundColor: '#ffffff', color: '#7422c5' }}
+            style={{ marginTop: '25px', backgroundColor: '#ffffff', color: '#7422c5', padding: '12px 30px', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
             onClick={() => handleOpenModal()}
           >
             Submit Application

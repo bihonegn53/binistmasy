@@ -4,36 +4,35 @@ import Navbar from './Navbar';
 
 export default function Layout({ onLogout }) {
   const location = useLocation();
-
   const isActive = (path) => location.pathname === path;
 
-  const navItems = [
+  // የጎን ሜኑ (Sidebar) ላይ የሚኖሩት መደበኛ አስተዳደራዊ ገጾች ብቻ ናቸው
+  const navItems = [ 
+    { label: 'Dashboard', path: '/', icon: '👥' },
     { label: 'Teacher', path: '/Teacher', icon: '📚' },
     { label: 'Employe', path: '/Employe', icon: 'ℹ️' },
     { label: 'History', path: '/History', icon: '🎓' },
     { label: 'Other', path: '/Other', icon: '📊' },
-    { label: 'help', path: '/help', icon: '👥' },
+    { label: 'Help', path: '/help', icon: '👥' },
     { label: 'Comment', path: '/Comment', icon: '👥' },
   ];
 
   return (
     <div style={styles.pageContainer}>
-      {/* 1. TOP NAVBAR (onLogout prop ወደ Navbar ይተላለፋል) */}
+      {/* 1. TOP NAVBAR (እዚህ ላይ Home Page ሊንክ ይኖረዋል) */}
       <Navbar onLogout={onLogout} />
-
+      
       {/* 2. MAIN BODY WRAPPER */}
       <div style={styles.bodyWrapper}>
         
-        {/* VERTICAL SIDEBAR (Left Side) */}
+        {/* VERTICAL SIDEBAR */}
         <aside style={styles.sidebar}>
           <div style={styles.sidebarHeader}>
-            <span style={styles.sidebarTitle}></span>
+            <span style={styles.sidebarTitle}>Admin Menu</span>
           </div>
-
           <nav style={styles.navStack}>
             {navItems.map((item) => {
               const active = isActive(item.path);
-
               return (
                 <Link
                   key={item.path}
@@ -52,7 +51,6 @@ export default function Layout({ onLogout }) {
             })}
           </nav>
 
-          {/* Sidebar ታች ላይ ተጨማሪ Log Out ከተፈለገ */}
           <div style={styles.logoutWrapper}>
             <button onClick={onLogout} style={styles.logoutButton}>
               <span style={{ fontSize: '16px' }}>🚪</span>
@@ -61,17 +59,15 @@ export default function Layout({ onLogout }) {
           </div>
         </aside>
 
-        {/* 3. DYNAMIC CONTENT AREA (Home/Courses/Admin ፔጆች የሚታዩበት ቦታ) */}
+        {/* 3. DYNAMIC CONTENT AREA */}
         <main style={styles.mainContent}>
           <Outlet />
         </main>
-
       </div>
     </div>
   );
 }
 
-// Inline styles
 const styles = {
   pageContainer: {
     display: 'flex',

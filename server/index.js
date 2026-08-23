@@ -2,7 +2,6 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { body, validationResult } from 'express-validator';
 import Student from './models/Student.js';
 
 dotenv.config();
@@ -15,158 +14,201 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-// Debug Logger
-app.use((req, res, next) => {
-  console.log(`[INCOMING REQUEST] ${req.method} ${req.url}`);
-  console.log('BODY:', req.body);
-  next();
-});
-
 // Database Connection
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/designAcademyDB';
 mongoose.connect(MONGODB_URI)
   .then(() => console.log('[SERVER] Connected to MongoDB.'))
   .catch(err => console.error('[SERVER] MongoDB connection error:', err));
 
+// 🛠️ 1. የተለየ የ Employee Schema
+const employeeSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  role: { type: String, required: true },
+  department: { type: String, default: 'Engineering' },
+  email: { type: String, required: true },
+  phone: { type: String, default: '' },
+  status: { type: String, default: 'Active' },
+  avatar: { type: String, default: '' },
+  documents: [
+    {
+      id: Number,
+      name: String,
+      size: String,
+      type: String,
+      data: String,
+      uploadedAt: String
+    }
+  ]
+}, { timestamps: true });
+
+// 🛠️ 2. ለ Teacher የሚሆን ሙሉ በሙሉ የተስተካከለ ስኪማ (Emergency እና Documents የያዘ)
+const teacherSchema = new mongoose.Schema({
+  fullName: { type: String, required: true },
+  email: { type: String, required: true },
+  role: { type: String, default: 'Computer Science' },
+  status: { type: String, default: 'Active' },
+  avatar: { type: String, default: '' },
+  emergencyName: { type: String, default: '' },
+  emergencyPhone: { type: String, default: '' },
+  documents: [
+    {
+      id: Number,
+      name: String,
+      size: String,
+      type: String,
+      data: String,
+      uploadedAt: String
+    }
+  ]
+}, { timestamps: true });
+
+const Employee = mongoose.models.Employee || mongoose.model('Employee', employeeSchema);
+const Teacher = mongoose.models.Teacher || mongoose.model('Teacher', teacherSchema);
+const Course = mongoose.models.Course || mongoose.model('Course', new mongoose.Schema({
+  title: String,
+  department: String,
+  code: String
+}, { timestamps: true }));
+
 const apiRouter = express.Router();
 
-// 🟢 GET /api/students - ሁሉንም ተማሪዎች በ A-Z ደርድሮ ማምጫ
+// --- የተማሪዎች ራውቶች ---
 apiRouter.get('/students', async (req, res) => {
   try {
-    const students = await Student.find()
-      .collation({ locale: 'en', strength: 2 })
-      .sort({ fullName: 1 }); // A to Z Sorting
-
+    const students = await Student.find().collation({ locale: 'en', strength: 2 }).sort({ fullName: 1 });
     return res.json(students);
   } catch (error) {
     return res.status(500).json({ message: 'Error fetching students.' });
   }
 });
 
-// 🟢 POST /api/students - አዲስ ተማሪ መመዝገቢያ
-apiRouter.post('/students', [
-  body('fullName').notEmpty().withMessage('Full Name is required.').trim(),
-  body('email').isEmail().withMessage('Valid email is required.').normalizeEmail(),
-], async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ message: errors.array()[0]?.msg || 'Validation error.' });
-  }
-
-  const { fullName, email, emergencyName, age, gender, startDate, program, department, assessments, document } = req.body;
-
+// --- የኮርሶች ራውቶች ---
+apiRouter.get('/courses', async (req, res) => {
   try {
-    const existing = await Student.findOne({ email });
-    if (existing) {
-      return res.status(409).json({ message: 'Email address is already registered.' });
-    }
-
-    const newStudent = new Student({
-      fullName,
-      email,
-      emergencyName: emergencyName || '',
-      age: age ? Number(age) : null,
-      gender: gender || 'male',
-      startDate: startDate || new Date(),
-      program: program || 'regular',
-      department: department || 'computer science',
-      assessments: assessments || {},
-      document: document || null
-    });
-
-    const savedStudent = await newStudent.save();
-    return res.status(201).json(savedStudent);
+    const courses = await Course.find();
+    return res.json(courses);
   } catch (error) {
-    console.error('[SERVER] Save error:', error);
-    return res.status(500).json({ message: 'Server error saving student.' });
+    return res.json([]);
   }
 });
 
-// 🟢 POST /api/register - Admission Registration
-apiRouter.post('/register', [
-  body('fullName').notEmpty().withMessage('Full Name is required.').trim(),
-  body('email').isEmail().withMessage('Valid email is required.').normalizeEmail(),
-  body('age').notEmpty().withMessage('Age is required.'),
-  body('gender').notEmpty().withMessage('Gender is required.'),
-  body('startDate').notEmpty().withMessage('Start Date is required.')
-], async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ message: errors.array()[0]?.msg || 'Validation error.' });
-  }
-
-  const { fullName, email, emergencyName, age, gender, startDate, program, department, assessments, document } = req.body;
-
+apiRouter.post('/courses', async (req, res) => {
   try {
-    const existing = await Student.findOne({ email });
-    if (existing) {
-      return res.status(409).json({ message: 'Email address is already registered.' });
-    }
-
-    const newStudent = new Student({
-      fullName,
-      email,
-      emergencyName: emergencyName || '',
-      age: Number(age),
-      gender,
-      startDate,
-      program: program || 'regular',
-      department: department || 'computer science',
-      assessments: assessments || {},
-      document: document || null
-    });
-
-    await newStudent.save();
-    return res.status(201).json({ message: 'Registration submitted successfully!', student: newStudent });
+    const newCourse = new Course(req.body);
+    const savedCourse = await newCourse.save();
+    return res.status(201).json(savedCourse);
   } catch (error) {
-    console.error('[SERVER] Save error:', error);
-    return res.status(500).json({ message: 'Server error saving registration.' });
+    return res.status(500).json({ message: 'Error saving course.' });
   }
 });
 
-// 🟢 PUT /api/students/:id - ተማሪ ማስተካከያ
-apiRouter.put('/students/:id', async (req, res) => {
+// --- የሰራተኞች (Employees) ራውቶች ---
+apiRouter.get('/employees', async (req, res) => {
   try {
-    const updatedStudent = await Student.findByIdAndUpdate(
+    const employees = await Employee.find();
+    return res.json(employees);
+  } catch (error) {
+    return res.json([]);
+  }
+});
+
+apiRouter.post('/employees', async (req, res) => {
+  try {
+    const newEmployee = new Employee(req.body);
+    const savedEmployee = await newEmployee.save();
+    return res.status(201).json(savedEmployee);
+  } catch (error) {
+    console.error('Error saving employee:', error);
+    return res.status(500).json({ message: 'Error saving employee.' });
+  }
+});
+
+apiRouter.put('/employees/:id', async (req, res) => {
+  try {
+    const updatedEmployee = await Employee.findByIdAndUpdate(
       req.params.id,
       req.body,
       { new: true, runValidators: true }
     );
-
-    if (!updatedStudent) {
-      return res.status(404).json({ message: 'Student not found.' });
+    if (!updatedEmployee) {
+      return res.status(404).json({ message: 'Employee not found.' });
     }
-
-    return res.json(updatedStudent);
+    return res.json(updatedEmployee);
   } catch (error) {
-    console.error('[SERVER] Update error:', error);
-    return res.status(500).json({ message: 'Error updating student details.' });
+    console.error('Error updating employee:', error);
+    return res.status(500).json({ message: 'Error updating employee.' });
   }
 });
 
-// 🟢 DELETE /api/students/:id - ተማሪ ማጥፊያ
-apiRouter.delete('/students/:id', async (req, res) => {
+apiRouter.delete('/employees/:id', async (req, res) => {
   try {
-    const deletedStudent = await Student.findByIdAndDelete(req.params.id);
-
-    if (!deletedStudent) {
-      return res.status(404).json({ message: 'Student not found.' });
+    const deletedEmployee = await Employee.findByIdAndDelete(req.params.id);
+    if (!deletedEmployee) {
+      return res.status(404).json({ message: 'Employee not found.' });
     }
-
-    return res.json({ message: 'Student deleted successfully.' });
+    return res.json({ message: 'Employee deleted successfully.' });
   } catch (error) {
-    console.error('[SERVER] Delete error:', error);
-    return res.status(500).json({ message: 'Error deleting student.' });
+    console.error('Error deleting employee:', error);
+    return res.status(500).json({ message: 'Error deleting employee.' });
+  }
+});
+
+// --- የአስተማሪዎች (Teachers) ራውቶች ---
+apiRouter.get('/teachers', async (req, res) => {
+  try {
+    const teachers = await Teacher.find();
+    return res.json(teachers);
+  } catch (error) {
+    return res.json([]);
+  }
+});
+
+apiRouter.post('/teachers', async (req, res) => {
+  try {
+    const newTeacher = new Teacher(req.body);
+    const savedTeacher = await newTeacher.save();
+    return res.status(201).json(savedTeacher);
+  } catch (error) {
+    console.error('Error saving teacher:', error);
+    return res.status(500).json({ message: 'Error saving teacher.' });
+  }
+});
+
+// ✏️ የአስተማሪ መረጃ ማሻሻያ (PUT Route for Teachers)
+apiRouter.put('/teachers/:id', async (req, res) => {
+  try {
+    const updatedTeacher = await Teacher.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+    if (!updatedTeacher) {
+      return res.status(404).json({ message: 'Teacher not found.' });
+    }
+    return res.json(updatedTeacher);
+  } catch (error) {
+    console.error('Error updating teacher:', error);
+    return res.status(500).json({ message: 'Error updating teacher.' });
+  }
+});
+
+// 🗑️ አስተማሪን ለመሰረዝ (DELETE Route for Teachers)
+apiRouter.delete('/teachers/:id', async (req, res) => {
+  try {
+    const deletedTeacher = await Teacher.findByIdAndDelete(req.params.id);
+    if (!deletedTeacher) {
+      return res.status(404).json({ message: 'Teacher not found.' });
+    }
+    return res.json({ message: 'Teacher deleted successfully.' });
+  } catch (error) {
+    console.error('Error deleting teacher:', error);
+    return res.status(500).json({ message: 'Error deleting teacher.' });
   }
 });
 
 app.use('/api', apiRouter);
 
 app.get('/', (req, res) => res.send('API Server is running.'));
-
-app.use((req, res) => {
-  res.status(404).json({ message: `Route ${req.method} ${req.url} not found on server.` });
-});
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`[SERVER] Express Server running on http://localhost:${PORT}`);
