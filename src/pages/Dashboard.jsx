@@ -38,20 +38,36 @@ export default function Dashboard() {
     fetchData();
   }, []);
 
-  // 1. የተማሪዎች ብዛት እና ዲፓርትመንት ስርጭት
+  // 1. የተማሪዎች ብዛት፣ ዲፓርትመንት እና ጾታ (Gender) ስርጭት
   const studentStats = useMemo(() => {
     const totalStudents = students.length;
     const departmentCounts = {};
+    const genderCounts = { male: 0, female: 0, other: 0 };
 
     students.forEach((student) => {
+      // ዲፓርትመንት ስሌት
       let dept = student.department || student.dept || student.Department || 'Unassigned';
       if (typeof dept === 'string') {
         dept = dept.trim();
       }
       departmentCounts[dept] = (departmentCounts[dept] || 0) + 1;
+
+      // ጾታ (Gender) ስሌት - (gender, sex በመሳሰሉት ቁልፎች ሊመጣ ስለሚችል ተለዋዋጭ አድርገነዋል)
+      let gender = student.gender || student.Gender || student.sex || student.Sex || 'other';
+      if (typeof gender === 'string') {
+        gender = gender.trim().toLowerCase();
+      }
+
+      if (gender === 'male' || gender === 'm' || gender === 'ወንድ') {
+        genderCounts.male += 1;
+      } else if (gender === 'female' || gender === 'f' || gender === 'ሴት') {
+        genderCounts.female += 1;
+      } else {
+        genderCounts.other += 1;
+      }
     });
 
-    return { totalStudents, departmentCounts };
+    return { totalStudents, departmentCounts, genderCounts };
   }, [students]);
 
   if (loading) {
@@ -137,9 +153,10 @@ export default function Dashboard() {
 
       </div>
 
-      {/* የዲፓርትመንት ስርጭት እና ማጠቃለያ */}
+      {/* የዲፓርትመንት ስርጭት እና የተማሪዎች ጾታ ስርጭት (Gender Distribution) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
+        {/* የዲፓርትመንት ስርጭት */}
         <div className="bg-white p-6 md:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
           <div>
             <h3 className="font-bold text-slate-900 text-base">የተማሪዎች ስርጭት በዲፓርትመንት (Students by Department)</h3>
@@ -174,41 +191,122 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* ማጠቃለያ ካርድ */}
-        <div className="bg-white p-6 md:p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-6">
+        {/* አዲስ የተጨመረው፡ የተማሪዎች ጾታ ስርጭት ግራፍ (Students by Gender) */}
+        <div className="bg-white p-6 md:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
           <div>
-            <h3 className="font-bold text-slate-900 text-base">የሰርቨር ግንኙነት ማጠቃለያ</h3>
-            <p className="text-xs text-slate-400 mt-0.5">ከባክኤንድ (Backend API) የተሰበሰቡ መረጃዎች ሁኔታ።</p>
+            <h3 className="font-bold text-slate-900 text-base">የተማሪዎች ጾታ ስርጭት (Gender Distribution)</h3>
+            <p className="text-xs text-slate-400 mt-0.5">በወንድ እና ሴት ተማሪዎች መካከል ያለው ምጣኔ።</p>
           </div>
 
-          <div className="space-y-3">
-            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
-              <span className="text-xs font-semibold text-slate-700">የተማሪዎች ዝርዝር</span>
-              <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">
-                <CheckCircle2 className="w-4 h-4" /> {studentStats.totalStudents} ተማሪዎች ተጭነዋል
-              </span>
+          <div className="space-y-5 pt-2">
+            {/* ወንድ ተማሪዎች */}
+            <div>
+              <div className="flex justify-between text-xs font-bold mb-1.5">
+                <span className="text-slate-700">ወንድ (Male)</span>
+                <span className="text-blue-600">
+                  {studentStats.totalStudents > 0 ? Math.round((studentStats.genderCounts.male / studentStats.totalStudents) * 100) : 0}% 
+                  ({studentStats.genderCounts.male} ተማሪዎች)
+                </span>
+              </div>
+              <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+                <div 
+                  className="bg-blue-600 h-full rounded-full transition-all duration-500" 
+                  style={{ 
+                    width: `${studentStats.totalStudents > 0 ? (studentStats.genderCounts.male / studentStats.totalStudents) * 100 : 0}%` 
+                  }}
+                ></div>
+              </div>
             </div>
 
-            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
-              <span className="text-xs font-semibold text-slate-700">የአስተማሪዎች ብዛት</span>
-              <span className="text-xs font-bold text-purple-600 flex items-center gap-1">
-                <CheckCircle2 className="w-4 h-4" /> {teachers.length} አስተማሪዎች ተመዝገበዋል
-              </span>
+            {/* ሴት ተማሪዎች */}
+            <div>
+              <div className="flex justify-between text-xs font-bold mb-1.5">
+                <span className="text-slate-700">ሴት (Female)</span>
+                <span className="text-pink-600">
+                  {studentStats.totalStudents > 0 ? Math.round((studentStats.genderCounts.female / studentStats.totalStudents) * 100) : 0}% 
+                  ({studentStats.genderCounts.female} ተማሪዎች)
+                </span>
+              </div>
+              <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+                <div 
+                  className="bg-pink-500 h-full rounded-full transition-all duration-500" 
+                  style={{ 
+                    width: `${studentStats.totalStudents > 0 ? (studentStats.genderCounts.female / studentStats.totalStudents) * 100 : 0}%` 
+                  }}
+                ></div>
+              </div>
             </div>
 
-            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
-              <span className="text-xs font-semibold text-slate-700">የሰራተኞች ብዛት</span>
-              <span className="text-xs font-bold text-blue-600 flex items-center gap-1">
-                <CheckCircle2 className="w-4 h-4" /> {employees.length} ሰራተኞች ተመዝገበዋል
-              </span>
-            </div>
+            {/* ሌሎች ካሉ (Other) */}
+            {studentStats.genderCounts.other > 0 && (
+              <div>
+                <div className="flex justify-between text-xs font-bold mb-1.5">
+                  <span className="text-slate-700">ሌሎች (Other)</span>
+                  <span className="text-amber-600">
+                    {Math.round((studentStats.genderCounts.other / studentStats.totalStudents) * 100)}% 
+                    ({studentStats.genderCounts.other} ተማሪዎች)
+                  </span>
+                </div>
+                <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+                  <div 
+                    className="bg-amber-500 h-full rounded-full transition-all duration-500" 
+                    style={{ 
+                      width: `${(studentStats.genderCounts.other / studentStats.totalStudents) * 100}%` 
+                    }}
+                  ></div>
+                </div>
+              </div>
+            )}
           </div>
 
-          <div className="p-4 bg-indigo-50 text-indigo-700 rounded-2xl text-xs font-medium leading-relaxed">
-            💡 ይህ ገጽ አሁን የተማሪዎችን፣ የአስተማሪዎችን እና የሰራተኞችን መረጃዎች ከሰርቨር አቀናጅቶ ያሳያል።
+          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-xs text-slate-500 flex justify-around text-center">
+            <div>
+              <span className="block font-bold text-slate-800 text-sm">{studentStats.genderCounts.male}</span>
+              <span>ወንዶች</span>
+            </div>
+            <div className="border-r border-slate-200"></div>
+            <div>
+              <span className="block font-bold text-slate-800 text-sm">{studentStats.genderCounts.female}</span>
+              <span>ሴቶች</span>
+            </div>
           </div>
         </div>
 
+      </div>
+
+      {/* የሰርቨር ግንኙነት ማጠቃለያ እና ተጨማሪ መረጃ */}
+      <div className="bg-white p-6 md:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+        <div>
+          <h3 className="font-bold text-slate-900 text-base">የሰርቨር ግንኙነት ማጠቃለያ</h3>
+          <p className="text-xs text-slate-400 mt-0.5">ከባክኤንድ (Backend API) የተሰበሰቡ መረጃዎች ሁኔታ።</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+            <span className="text-xs font-semibold text-slate-700">የተማሪዎች ዝርዝር</span>
+            <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">
+              <CheckCircle2 className="w-4 h-4" /> {studentStats.totalStudents} ተማሪዎች
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+            <span className="text-xs font-semibold text-slate-700">የአስተማሪዎች ብዛት</span>
+            <span className="text-xs font-bold text-purple-600 flex items-center gap-1">
+              <CheckCircle2 className="w-4 h-4" /> {teachers.length} አስተማሪዎች
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+            <span className="text-xs font-semibold text-slate-700">የሰራተኞች ብዛት</span>
+            <span className="text-xs font-bold text-blue-600 flex items-center gap-1">
+              <CheckCircle2 className="w-4 h-4" /> {employees.length} ሰራተኞች
+            </span>
+          </div>
+        </div>
+
+        <div className="p-4 bg-indigo-50 text-indigo-700 rounded-2xl text-xs font-medium leading-relaxed">
+          💡 ይህ ገጽ አሁን የተማሪዎችን፣ የአስተማሪዎችን እና የሰራተኞችን መረጃዎች ከሰርቨር አቀናጅቶ በዲፓርትመንት እና በጾታ ስርጭት መልክ በግራፍ አሳይቷል።
+        </div>
       </div>
 
     </div>

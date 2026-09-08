@@ -363,12 +363,12 @@ const HomePage = () => {
       {/* 5. Contact & CTA Section */}
       <section className="contact-section container" style={{ padding: '60px 20px', textAlign: 'center', maxWidth: '800px', margin: '0 auto' }}>
         <h2 className="section-title" style={{ fontSize: '2rem', marginBottom: '15px', color: '#1f2937' }}>Get In Touch</h2>
-        <p style={{ fontSize: '1.1rem', color: '#4b5563', marginBottom: '30px' }}>
+        <p style={{ fontSize: '1.1rem', color: '#f2f5fa', marginBottom: '30px' }}>
           Interested in enrolling or hiring our top UI design graduates? Reach out to us today.
         </p>
         <div className="contact-details" style={{ background: '#7422c5', color: '#fff', padding: '40px', borderRadius: '16px', boxShadow: '0 10px 30px rgba(116, 34, 197, 0.2)' }}>
           <p style={{ margin: '10px 0', fontSize: '1.1rem' }}><strong>Phone:</strong> 0953595426</p>
-          <p style={{ margin: '10px 0', fontSize: '1.1rem' }}><strong>Email:</strong> admissions@asebini-uidesign.edu</p>
+          <p style={{ margin: '10px 0', fontSize: '1.1rem' }}><strong>Email:</strong> bihonegntadie@gmail.com</p>
           <p style={{ margin: '10px 0', fontSize: '1.1rem' }}><strong>Location:</strong> Addis Ababa, Ethiopia</p>
           <button 
             className="btn-primary" 
